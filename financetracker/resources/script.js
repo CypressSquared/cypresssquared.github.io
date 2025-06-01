@@ -1,5 +1,7 @@
 const canvas = document.getElementById('displayWindow').getContext('2d');
 
+
+// template for data
 const masterData = {
   Essentials: {
     subCategory: {
@@ -31,8 +33,11 @@ const masterData = {
   }
 };
 
+// setting up a new object to be used for data manipulation
 let data = masterData;
 
+
+// chart to be used when there is no user data
 const emptyChartData = {
   labels: ["No data"],
   datasets: [{
@@ -41,10 +46,14 @@ const emptyChartData = {
   }]
 };
 
+
+// for calculating total in each category
 function sumCategories(group) {
   return Object.values(group.subCategory).reduce((sum, entry) => sum + entry.amount, 0);
 }
 
+
+// loading user data
 function loadData() {
   const savedUserFinanceData = localStorage.getItem('userFinanceData');
   if (savedUserFinanceData) {
@@ -52,6 +61,8 @@ function loadData() {
   }
 }
 
+
+// convert user data into json, saving it into downloaded file
 function exportData() {
   const exportUserFinanceData = JSON.stringify(data, null, 2);
   const blob = new Blob([exportUserFinanceData], { type: 'application/json' });
@@ -61,6 +72,8 @@ function exportData() {
   downloadLink.click();
 }
 
+
+// logic for checking the structure of the uploaded file
 function validateImportData(dataToCheck) {
   function checkKeys(a, b) {
     const aKeys = Object.keys(a).sort();
@@ -96,6 +109,8 @@ function validateImportData(dataToCheck) {
   return checkStructure(dataToCheck, masterData);
 }
 
+
+// clearing user data (will clear local storage)
 function clearData() {
 
   if (confirm("Are you sure you want to clear your data?")) {
@@ -106,6 +121,8 @@ function clearData() {
   }
 }
 
+
+// programatically generated legend for future proofing in case more categories are added later
 function updateLegend(summedDataSet) {
   const legend = document.getElementById("legend");
   legend.innerHTML = "";
@@ -157,6 +174,8 @@ function updateLegend(summedDataSet) {
 
 }
 
+
+// grab user data from the form
 function takeInput() {
   const selectedCategory = document.getElementById("category").value;
 
@@ -180,8 +199,12 @@ function takeInput() {
   updateTracker();
 }
 
+
+// update the ui to reflect changes
 function updateTracker() {
 
+
+  // for converting values into percentages to be displayed
   const grandTotal = Object.values(data).reduce((total, category) => {
     return total + sumCategories(category);
   }, 0);
@@ -195,6 +218,7 @@ function updateTracker() {
     };
   });
 
+  // checking which chart to display, whether to display empty or populated chart
   const zeroData = summedData.every(entry => entry.total === 0);
 
   const chartData = zeroData ? emptyChartData : {
@@ -260,14 +284,18 @@ function updateTracker() {
     }
   }
 
+
+  // save final updated data into local storage
   localStorage.setItem('userFinanceData', JSON.stringify(data));
+
+  // render updates to the ui
   updateLegend(summedData);
   financeChart.update();
 
 }
 
 
-// On load and hooking buttons up to functions
+// on load and hooking buttons up to functions
 document.getElementById("submitButton").addEventListener('click', takeInput);
 document.getElementById("exportDataButton").addEventListener('click', exportData);
 document.getElementById("importDataButton").addEventListener('click', function (event) {
